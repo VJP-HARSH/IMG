@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Gallery - 100 Images</title>
+    <title>Media Gallery - Photos & Videos</title>
     <style>
         * {
             margin: 0;
@@ -33,12 +33,12 @@
 
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
         }
 
-        .photo-item {
+        .media-item {
             position: relative;
             overflow: hidden;
             border-radius: 15px;
@@ -49,46 +49,112 @@
             aspect-ratio: 1;
         }
 
-        .photo-item:hover {
+        .media-item:hover {
             transform: translateY(-10px) scale(1.02);
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
-        .photo-item img {
+        .media-item img, .media-item video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
 
-        .photo-item:hover img {
+        .media-item:hover img, .media-item:hover video {
             transform: scale(1.1);
         }
 
-        .photo-overlay {
+        .media-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
             color: white;
             padding: 20px;
             transform: translateY(100%);
             transition: transform 0.3s ease;
         }
 
-        .photo-item:hover .photo-overlay {
+        .media-item:hover .media-overlay {
             transform: translateY(0);
         }
 
-        .photo-title {
+        .media-title {
             font-weight: bold;
             margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .photo-description {
+        .media-type-icon {
+            font-size: 16px;
+        }
+
+        .media-description {
             font-size: 0.9em;
             opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .media-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .download-btn, .view-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .download-btn {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .download-btn:hover {
+            background: rgba(76, 175, 80, 1);
+            transform: scale(1.05);
+        }
+
+        .view-btn {
+            background: rgba(33, 150, 243, 0.8);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .view-btn:hover {
+            background: rgba(33, 150, 243, 1);
+            transform: scale(1.05);
+        }
+
+        .video-play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 20px rgba(0,0,0,0.7);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .media-item:hover .video-play-icon {
+            transform: translate(-50%, -50%) scale(1.2);
+            color: white;
         }
 
         /* Lightbox Modal */
@@ -100,7 +166,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(10px);
         }
 
@@ -113,26 +179,72 @@
             max-height: 90%;
         }
 
-        .lightbox img {
+        .lightbox img, .lightbox video {
             width: 100%;
             height: auto;
+            max-height: 80vh;
             border-radius: 10px;
             box-shadow: 0 0 50px rgba(255,255,255,0.1);
         }
 
-        .close {
+        .lightbox-header {
             position: absolute;
             top: 20px;
-            right: 40px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             color: white;
-            font-size: 40px;
+            z-index: 1001;
+        }
+
+        .lightbox-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .lightbox-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .close {
+            color: white;
+            font-size: 30px;
             font-weight: bold;
             cursor: pointer;
             transition: color 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 50%;
+            backdrop-filter: blur(10px);
         }
 
         .close:hover {
             color: #667eea;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .lightbox-download {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lightbox-download:hover {
+            background: rgba(76, 175, 80, 1);
+            transform: scale(1.05);
         }
 
         .nav-btn {
@@ -210,9 +322,37 @@
             transform: translateY(-2px);
         }
 
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
         @media (max-width: 768px) {
             .gallery {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                 gap: 15px;
             }
             
@@ -228,93 +368,290 @@
             .search-box {
                 min-width: 250px;
             }
+
+            .stats {
+                gap: 15px;
+            }
+
+            .stat-item {
+                padding: 10px 15px;
+            }
+
+            .lightbox-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Photo Gallery</h1>
+        <h1>📸 Media Gallery</h1>
+        
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <span class="stat-number" id="totalCount">0</span>
+                <span class="stat-label">Total Files</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="photoCount">0</span>
+                <span class="stat-label">Photos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="videoCount">0</span>
+                <span class="stat-label">Videos</span>
+            </div>
+        </div>
         
         <div class="controls">
-            <input type="text" class="search-box" placeholder="Search photos..." id="searchBox">
-            <button class="filter-btn active" onclick="filterPhotos('all')">All</button>
-            <button class="filter-btn" onclick="filterPhotos('landscape')">Landscape</button>
-            <button class="filter-btn" onclick="filterPhotos('portrait')">Portrait</button>
-            <button class="filter-btn" onclick="filterPhotos('nature')">Nature</button>
+            <input type="text" class="search-box" placeholder="Search media files..." id="searchBox">
+            <button class="filter-btn active" onclick="filterMedia('all')">All</button>
+            <button class="filter-btn" onclick="filterMedia('photo')">📸 Photos</button>
+            <button class="filter-btn" onclick="filterMedia('video')">🎬 Videos</button>
+            <button class="filter-btn" onclick="filterMedia('landscape')">🏔️ Landscape</button>
+            <button class="filter-btn" onclick="filterMedia('portrait')">👤 Portrait</button>
         </div>
 
         <div class="gallery" id="gallery">
-            <div class="loading">Loading photos...</div>
+            <div class="loading">Loading media files...</div>
         </div>
     </div>
 
     <!-- Lightbox Modal -->
     <div id="lightbox" class="lightbox">
-        <span class="close" onclick="closeLightbox()">&times;</span>
-        <button class="nav-btn prev" onclick="changeImage(-1)">&#10094;</button>
-        <button class="nav-btn next" onclick="changeImage(1)">&#10095;</button>
-        <div class="lightbox-content">
-            <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-header">
+            <div class="lightbox-title" id="lightboxTitle">Media Title</div>
+            <div class="lightbox-actions">
+                <a href="#" class="lightbox-download" id="lightboxDownload" download>
+                    📥 Download
+                </a>
+                <span class="close" onclick="closeLightbox()">&times;</span>
+            </div>
+        </div>
+        <button class="nav-btn prev" onclick="changeMedia(-1)">&#10094;</button>
+        <button class="nav-btn next" onclick="changeMedia(1)">&#10095;</button>
+        <div class="lightbox-content" id="lightboxContent">
+            <img id="lightbox-img" src="" alt="" style="display: none;">
+            <video id="lightbox-video" controls style="display: none;"></video>
         </div>
     </div>
 
     <script>
-        let photos = [];
-        let filteredPhotos = [];
-        let currentImageIndex = 0;
+        let mediaFiles = [];
+        let filteredMedia = [];
+        let currentMediaIndex = 0;
         let currentFilter = 'all';
 
-        // Generate 100 sample photos (replace with your actual image paths)
-        function generatePhotos() {
-            const categories = ['landscape', 'portrait', 'nature', 'urban'];
-            const sampleImages = [
-                'https://picsum.photos/400/400?random=',
-                'https://source.unsplash.com/400x400/?photo,',
-                'https://via.placeholder.com/400x400/667eea/ffffff?text=Photo+'
+        // Scan local folder for media files
+        async function scanLocalFolder() {
+            const photoExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff'];
+            const videoExtensions = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'flv', '3gp'];
+            const categories = ['landscape', 'portrait', 'nature', 'urban', 'event'];
+            
+            let foundFiles = [];
+            let fileIndex = 1;
+
+            // Common naming patterns to check
+            const namingPatterns = [
+                'photo', 'image', 'img', 'pic', 'picture', 'snap', 'shot',
+                'video', 'vid', 'movie', 'clip', 'film'
             ];
 
-            for (let i = 1; i <= 100; i++) {
-                const category = categories[Math.floor(Math.random() * categories.length)];
-                const imageUrl = `img/photo${i}.jpg`; // Your actual image path
-                // For demo, using placeholder images
-                const demoUrl = sampleImages[0] + i;
-                
-                photos.push({
-                    id: i,
-                    src: imageUrl,
-                    demoSrc: demoUrl, // Remove this in production
-                    title: `Photo ${i}`,
-                    description: `Beautiful ${category} photograph`,
-                    category: category,
-                    alt: `Photo ${i} - ${category}`
-                });
+            // Check for files with different naming patterns
+            for (let pattern of namingPatterns) {
+                for (let i = 1; i <= 200; i++) { // Check up to 200 files
+                    const extensions = pattern.includes('vid') || pattern.includes('movie') || pattern.includes('clip') || pattern.includes('film') 
+                        ? videoExtensions : [...photoExtensions, ...videoExtensions];
+                    
+                    for (let ext of extensions) {
+                        const possiblePaths = [
+                            `img/${pattern}${i}.${ext}`,
+                            `img/${pattern}${String(i).padStart(2, '0')}.${ext}`,
+                            `img/${pattern}${String(i).padStart(3, '0')}.${ext}`,
+                            `img/${i}.${ext}`,
+                            `media/${pattern}${i}.${ext}`,
+                            `photos/${pattern}${i}.${ext}`,
+                            `videos/${pattern}${i}.${ext}`,
+                            `assets/${pattern}${i}.${ext}`
+                        ];
+
+                        for (let path of possiblePaths) {
+                            try {
+                                // Check if file exists by trying to load it
+                                const exists = await checkFileExists(path);
+                                if (exists && !foundFiles.some(f => f.src === path)) {
+                                    const isVideo = videoExtensions.includes(ext.toLowerCase());
+                                    const category = categories[Math.floor(Math.random() * categories.length)];
+                                    
+                                    foundFiles.push({
+                                        id: fileIndex++,
+                                        type: isVideo ? 'video' : 'photo',
+                                        src: path,
+                                        title: `${isVideo ? 'Video' : 'Photo'} ${foundFiles.length + 1}`,
+                                        description: `${category} ${isVideo ? 'video' : 'photograph'}`,
+                                        category: category,
+                                        alt: `${isVideo ? 'Video' : 'Photo'} ${foundFiles.length + 1} - ${category}`,
+                                        fileSize: `${(Math.random() * (isVideo ? 50 : 5) + (isVideo ? 10 : 1)).toFixed(1)} MB`,
+                                        extension: ext.toLowerCase()
+                                    });
+
+                                    if (foundFiles.length >= 100) break;
+                                }
+                            } catch (e) {
+                                // File doesn't exist, continue
+                            }
+                        }
+                        if (foundFiles.length >= 100) break;
+                    }
+                    if (foundFiles.length >= 100) break;
+                }
+                if (foundFiles.length >= 100) break;
             }
-            filteredPhotos = [...photos];
+
+            // If no files found, create placeholder entries for common naming
+            if (foundFiles.length === 0) {
+                for (let i = 1; i <= 100; i++) {
+                    const isVideo = i > 70; // First 70 photos, rest videos
+                    const category = categories[Math.floor(Math.random() * categories.length)];
+                    const ext = isVideo ? 'mp4' : 'jpg';
+                    
+                    foundFiles.push({
+                        id: i,
+                        type: isVideo ? 'video' : 'photo',
+                        src: `img/${isVideo ? 'video' : 'photo'}${isVideo ? i-70 : i}.${ext}`,
+                        title: `${isVideo ? 'Video' : 'Photo'} ${isVideo ? i-70 : i}`,
+                        description: `${category} ${isVideo ? 'video' : 'photograph'}`,
+                        category: category,
+                        alt: `${isVideo ? 'Video' : 'Photo'} ${isVideo ? i-70 : i} - ${category}`,
+                        fileSize: `${(Math.random() * (isVideo ? 50 : 5) + (isVideo ? 10 : 1)).toFixed(1)} MB`,
+                        extension: ext
+                    });
+                }
+            }
+
+            mediaFiles = foundFiles;
+            filteredMedia = [...mediaFiles];
+            updateStats();
+        }
+
+        // Check if file exists (local files only)
+        function checkFileExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const video = document.createElement('video');
+                
+                const cleanup = () => {
+                    img.onload = img.onerror = null;
+                    video.onloadeddata = video.onerror = null;
+                };
+                
+                // Try as image first
+                img.onload = () => {
+                    cleanup();
+                    resolve(true);
+                };
+                
+                img.onerror = () => {
+                    // Try as video
+                    video.onloadeddata = () => {
+                        cleanup();
+                        resolve(true);
+                    };
+                    
+                    video.onerror = () => {
+                        cleanup();
+                        resolve(false);
+                    };
+                    
+                    video.src = url;
+                };
+                
+                img.src = url;
+                
+                // Timeout after 2 seconds
+                setTimeout(() => {
+                    cleanup();
+                    resolve(false);
+                }, 2000);
+            });
+        }
+
+        function updateStats() {
+            const totalCount = filteredMedia.length;
+            const photoCount = filteredMedia.filter(m => m.type === 'photo').length;
+            const videoCount = filteredMedia.filter(m => m.type === 'video').length;
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('photoCount').textContent = photoCount;
+            document.getElementById('videoCount').textContent = videoCount;
         }
 
         function renderGallery() {
             const gallery = document.getElementById('gallery');
             
-            if (filteredPhotos.length === 0) {
-                gallery.innerHTML = '<div class="loading">No photos found</div>';
+            if (filteredMedia.length === 0) {
+                gallery.innerHTML = '<div class="loading">No media files found</div>';
                 return;
             }
 
-            gallery.innerHTML = filteredPhotos.map((photo, index) => `
-                <div class="photo-item" onclick="openLightbox(${index})" data-category="${photo.category}">
-                    <img src="${photo.demoSrc}" alt="${photo.alt}" loading="lazy">
-                    <div class="photo-overlay">
-                        <div class="photo-title">${photo.title}</div>
-                        <div class="photo-description">${photo.description}</div>
+            gallery.innerHTML = filteredMedia.map((media, index) => `
+                <div class="media-item" data-category="${media.category}" data-type="${media.type}">
+                    ${media.type === 'photo' ? 
+                        `<img src="${media.src}" alt="${media.alt}" loading="lazy" 
+                             onerror="handleMediaError(this, ${media.id})" 
+                             onclick="openLightbox(${index})">` :
+                        `<video src="${media.src}" 
+                               onerror="handleMediaError(this, ${media.id})"
+                               onclick="openLightbox(${index})" muted>
+                         </video>
+                         <div class="video-play-icon">▶</div>`
+                    }
+                    <div class="media-overlay">
+                        <div class="media-title">
+                            <span class="media-type-icon">${media.type === 'photo' ? '📸' : '🎬'}</span>
+                            ${media.title}
+                        </div>
+                        <div class="media-description">${media.description}</div>
+                        <div class="media-description" style="font-size: 11px; opacity: 0.7;">
+                            ${media.fileSize} • ${media.type.toUpperCase()}
+                        </div>
+                        <div class="media-actions">
+                            <button class="view-btn" onclick="openLightbox(${index}); event.stopPropagation();">
+                                👁️ View
+                            </button>
+                            <a href="${media.src}" class="download-btn" download="${media.title}" 
+                               onclick="event.stopPropagation();">
+                                📥 Download
+                            </a>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
         function openLightbox(index) {
-            currentImageIndex = index;
-            const photo = filteredPhotos[index];
-            document.getElementById('lightbox-img').src = photo.demoSrc;
+            currentMediaIndex = index;
+            const media = filteredMedia[index];
+            
+            document.getElementById('lightboxTitle').textContent = media.title;
+            document.getElementById('lightboxDownload').href = media.src;
+            document.getElementById('lightboxDownload').download = media.title;
+            
+            const img = document.getElementById('lightbox-img');
+            const video = document.getElementById('lightbox-video');
+            
+            if (media.type === 'photo') {
+                img.src = media.src;
+                img.style.display = 'block';
+                video.style.display = 'none';
+                video.pause();
+            } else {
+                video.src = media.src;
+                video.style.display = 'block';
+                img.style.display = 'none';
+            }
+            
             document.getElementById('lightbox').style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
@@ -322,106 +659,171 @@
         function closeLightbox() {
             document.getElementById('lightbox').style.display = 'none';
             document.body.style.overflow = 'auto';
+            
+            // Pause video if playing
+            const video = document.getElementById('lightbox-video');
+            if (video.src) {
+                video.pause();
+            }
         }
 
-        function changeImage(direction) {
-            currentImageIndex += direction;
+        function changeMedia(direction) {
+            currentMediaIndex += direction;
             
-            if (currentImageIndex >= filteredPhotos.length) {
-                currentImageIndex = 0;
-            } else if (currentImageIndex < 0) {
-                currentImageIndex = filteredPhotos.length - 1;
+            if (currentMediaIndex >= filteredMedia.length) {
+                currentMediaIndex = 0;
+            } else if (currentMediaIndex < 0) {
+                currentMediaIndex = filteredMedia.length - 1;
             }
             
-            const photo = filteredPhotos[currentImageIndex];
-            document.getElementById('lightbox-img').src = photo.demoSrc;
+            openLightbox(currentMediaIndex);
         }
 
-        function filterPhotos(category) {
-            currentFilter = category;
+        function filterMedia(type) {
+            currentFilter = type;
             
             // Update active button
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Filter photos
-            if (category === 'all') {
-                filteredPhotos = [...photos];
+            // Filter media
+            if (type === 'all') {
+                filteredMedia = [...mediaFiles];
+            } else if (type === 'photo' || type === 'video') {
+                filteredMedia = mediaFiles.filter(media => media.type === type);
             } else {
-                filteredPhotos = photos.filter(photo => photo.category === category);
+                filteredMedia = mediaFiles.filter(media => media.category === type);
             }
             
             // Apply search if active
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             if (searchTerm) {
-                filteredPhotos = filteredPhotos.filter(photo => 
-                    photo.title.toLowerCase().includes(searchTerm) ||
-                    photo.description.toLowerCase().includes(searchTerm) ||
-                    photo.category.toLowerCase().includes(searchTerm)
+                filteredMedia = filteredMedia.filter(media => 
+                    media.title.toLowerCase().includes(searchTerm) ||
+                    media.description.toLowerCase().includes(searchTerm) ||
+                    media.category.toLowerCase().includes(searchTerm) ||
+                    media.type.toLowerCase().includes(searchTerm)
                 );
             }
             
+            updateStats();
             renderGallery();
         }
 
-        function searchPhotos() {
+        function searchMedia() {
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             
-            let basePhotos = currentFilter === 'all' ? photos : 
-                            photos.filter(photo => photo.category === currentFilter);
+            let baseMedia = currentFilter === 'all' ? mediaFiles : 
+                           (currentFilter === 'photo' || currentFilter === 'video') ?
+                           mediaFiles.filter(media => media.type === currentFilter) :
+                           mediaFiles.filter(media => media.category === currentFilter);
             
             if (searchTerm) {
-                filteredPhotos = basePhotos.filter(photo => 
-                    photo.title.toLowerCase().includes(searchTerm) ||
-                    photo.description.toLowerCase().includes(searchTerm) ||
-                    photo.category.toLowerCase().includes(searchTerm)
+                filteredMedia = baseMedia.filter(media => 
+                    media.title.toLowerCase().includes(searchTerm) ||
+                    media.description.toLowerCase().includes(searchTerm) ||
+                    media.category.toLowerCase().includes(searchTerm) ||
+                    media.type.toLowerCase().includes(searchTerm)
                 );
             } else {
-                filteredPhotos = [...basePhotos];
+                filteredMedia = [...baseMedia];
             }
             
+            updateStats();
             renderGallery();
+        }
+
+        // Handle media loading errors - Local files only
+        function handleMediaError(element, mediaId) {
+            const media = mediaFiles.find(m => m.id === mediaId);
+            
+            // Show file not found placeholder
+            element.style.background = 'linear-gradient(45deg, #f5f5f5, #e8e8e8)';
+            element.style.display = 'flex';
+            element.style.alignItems = 'center';
+            element.style.justifyContent = 'center';
+            element.style.color = '#666';
+            element.innerHTML = `<div style="text-align: center; padding: 20px;">
+                <div style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;">
+                    ${media && media.type === 'video' ? '🎬' : '📷'}
+                </div>
+                <div style="font-weight: bold; margin-bottom: 5px;">${media ? media.title : 'Media File'}</div>
+                <div style="font-size: 12px; opacity: 0.7;">File not found in local folder</div>
+                <div style="font-size: 10px; margin-top: 5px; opacity: 0.5;">
+                    Expected: ${media ? media.src : 'Unknown path'}
+                </div>
+            </div>`;
+            element.onerror = null;
+            
+            // Remove click functionality for missing files
+            element.onclick = function() {
+                alert(`File not found: ${media ? media.src : 'Unknown'}\n\nPlease check if the file exists in your local folder.`);
+            };
         }
 
         // Event Listeners
-        document.getElementById('searchBox').addEventListener('input', searchPhotos);
+        document.getElementById('searchBox').addEventListener('input', searchMedia);
 
-        // Keyboard navigation for lightbox
+        // Keyboard navigation
         document.addEventListener('keydown', function(e) {
             if (document.getElementById('lightbox').style.display === 'block') {
-                if (e.key === 'ArrowLeft') changeImage(-1);
-                if (e.key === 'ArrowRight') changeImage(1);
+                if (e.key === 'ArrowLeft') changeMedia(-1);
+                if (e.key === 'ArrowRight') changeMedia(1);
                 if (e.key === 'Escape') closeLightbox();
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    const video = document.getElementById('lightbox-video');
+                    if (video.style.display === 'block') {
+                        if (video.paused) video.play();
+                        else video.pause();
+                    }
+                }
             }
         });
 
-        // Close lightbox when clicking outside image
+        // Close lightbox when clicking outside
         document.getElementById('lightbox').addEventListener('click', function(e) {
             if (e.target === this) closeLightbox();
         });
 
-        // Initialize
-        generatePhotos();
-        renderGallery();
-
-        // Lazy loading optimization
-        function addLazyLoading() {
-            const images = document.querySelectorAll('img[loading="lazy"]');
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        img.src = img.src; // Trigger loading
-                        observer.unobserve(img);
-                    }
-                });
-            });
-
-            images.forEach(img => imageObserver.observe(img));
+        // Initialize - Scan local folder first
+        async function initializeGallery() {
+            document.getElementById('gallery').innerHTML = '<div class="loading">🔍 Scanning local folders for media files...</div>';
+            
+            try {
+                await scanLocalFolder();
+                
+                if (mediaFiles.length === 0) {
+                    document.getElementById('gallery').innerHTML = `
+                        <div class="loading" style="text-align: center; padding: 40px;">
+                            <div style="font-size: 48px; margin-bottom: 20px;">📁</div>
+                            <h3 style="margin-bottom: 15px; color: white;">No media files found</h3>
+                            <p style="margin-bottom: 20px; opacity: 0.8;">Create these folders and add your files:</p>
+                            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; text-align: left; max-width: 400px; margin: 0 auto;">
+                                <strong>📂 Folder structure:</strong><br>
+                                📁 img/ &nbsp;&nbsp;&nbsp;&nbsp; (photos & videos)<br>
+                                📁 media/ &nbsp;&nbsp; (photos & videos)<br>
+                                📁 photos/ &nbsp; (photos only)<br>
+                                📁 videos/ &nbsp; (videos only)<br><br>
+                                <strong>📄 File naming:</strong><br>
+                                • photo1.jpg, photo2.png<br>
+                                • video1.mp4, video2.webm<br>
+                                • image1.jpg, pic1.png<br>
+                                • 1.jpg, 2.mp4 (simple numbers)
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    renderGallery();
+                }
+                
+            } catch (error) {
+                document.getElementById('gallery').innerHTML = '<div class="loading">❌ Error scanning folders. Please check your file structure.</div>';
+            }
         }
 
-        // Call after gallery renders
-        setTimeout(addLazyLoading, 100);
+        // Initialize
+        initializeGallery();
     </script>
 </body>
 </html>
